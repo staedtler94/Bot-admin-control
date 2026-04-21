@@ -1,0 +1,33 @@
+import { useEffect, useState } from 'react';
+import { Worker } from '../types/worker';
+import { workerService } from '../services/workerService';
+
+export const useWorkersByBotId = (botId: string) => {
+  const [workers, setWorkers] = useState<Worker[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!botId) {
+      setLoading(false);
+      return;
+    }
+
+    const fetchWorkers = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await workerService.getWorkersByBotId(botId);
+        setWorkers(response.data || []);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to fetch workers');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchWorkers();
+  }, [botId]);
+
+  return { workers, loading, error };
+};
