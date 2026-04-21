@@ -3,7 +3,7 @@ import { getDynamoDBClient } from '../config/database';
 import { Log, CreateLogInput, LogFilter } from '../models/Log';
 import { v4 as uuidv4 } from 'uuid';
 
-const TABLE_NAME = 'logs';
+const TABLE_NAME = 'bot-admin';
 
 export class LogRepository {
   static async findByBotId(botId: string, limit: number = 20): Promise<{ items: Log[]; count: number }> {
@@ -11,10 +11,9 @@ export class LogRepository {
     const result = await client.send(
       new QueryCommand({
         TableName: TABLE_NAME,
-        IndexName: 'bot-index',
-        KeyConditionExpression: 'bot = :botId',
+        KeyConditionExpression: 'pk = :pk',
         ExpressionAttributeValues: {
-          ':botId': botId,
+          ':pk': `Log#${botId}`,
         },
         Limit: limit,
         ScanIndexForward: false, // Most recent first
@@ -27,15 +26,15 @@ export class LogRepository {
     };
   }
 
-  static async findByWorkerId(workerId: string, limit: number = 20): Promise<{ items: Log[]; count: number }> {
+  static async findByWorkerId(botId: string, workerId: string, limit: number = 20): Promise<{ items: Log[]; count: number }> {
     const client = getDynamoDBClient();
     const result = await client.send(
       new QueryCommand({
         TableName: TABLE_NAME,
-        IndexName: 'worker-index',
-        KeyConditionExpression: 'worker = :workerId',
+        KeyConditionExpression: 'pk = :pk AND begins_with(sk, :workerId)',
         ExpressionAttributeValues: {
-          ':workerId': workerId,
+          ':pk': `Log#${botId}`,
+          ':workerId': `${workerId}#`,
         },
         Limit: limit,
         ScanIndexForward: false, // Most recent first
@@ -58,22 +57,22 @@ export class LogRepository {
       result = await client.send(
         new QueryCommand({
           TableName: TABLE_NAME,
-          IndexName: 'bot-index',
-          KeyConditionExpression: 'bot = :botId',
+          KeyConditionExpression: 'pk = :pk',
           FilterExpression: this.buildFilterExpression(filter),
           ExpressionAttributeValues: this.buildAttributeValues(filter),
+          ExpressionAttributeNames: filter.messageSearch ? { '#message': 'message' } : undefined,
           Limit: limit,
           ScanIndexForward: false,
         })
       );
-    } else if (filter.worker) {
+    } else if (filter.worker && filter.bot) {
       result = await client.send(
         new QueryCommand({
           TableName: TABLE_NAME,
-          IndexName: 'worker-index',
-          KeyConditionExpression: 'worker = :workerId',
+          KeyConditionExpression: 'pk = :pk AND begins_with(sk, :workerId)',
           FilterExpression: this.buildFilterExpression(filter),
           ExpressionAttributeValues: this.buildAttributeValues(filter),
+          ExpressionAttributeNames: filter.messageSearch ? { '#message': 'message' } : undefined,
           Limit: limit,
           ScanIndexForward: false,
         })
@@ -84,6 +83,7 @@ export class LogRepository {
           TableName: TABLE_NAME,
           FilterExpression: this.buildFilterExpression(filter),
           ExpressionAttributeValues: this.buildAttributeValues(filter),
+          ExpressionAttributeNames: filter.messageSearch ? { '#message': 'message' } : undefined,
           Limit: limit,
         })
       );
@@ -98,7 +98,7 @@ export class LogRepository {
   static async create(input: CreateLogInput): Promise<Log> {
     const client = getDynamoDBClient();
     const log: Log = {
-      id: uuidv4(),
+      id: input.id || uuidv4(),
       created: new Date().toISOString(),
       message: input.message,
       bot: input.bot,
@@ -108,7 +108,11 @@ export class LogRepository {
     await client.send(
       new PutCommand({
         TableName: TABLE_NAME,
-        Item: log,
+        Item: {
+          pk: `Log#${log.bot}`,
+          sk: `${log.worker}#${log.id}`,
+          ...log,
+        },
       })
     );
 
@@ -117,14 +121,6 @@ export class LogRepository {
 
   private static buildFilterExpression(filter: LogFilter): string | undefined {
     const conditions: string[] = [];
-
-    if (filter.bot) {
-      conditions.push('bot = :botId');
-    }
-
-    if (filter.worker) {
-      conditions.push('worker = :workerId');
-    }
 
     if (filter.messageSearch) {
       conditions.push('contains(#message, :messageSearch)');
@@ -144,14 +140,6 @@ export class LogRepository {
   private static buildAttributeValues(filter: LogFilter): Record<string, any> {
     const values: Record<string, any> = {};
 
-    if (filter.bot) {
-      values[':botId'] = filter.bot;
-    }
-
-    if (filter.worker) {
-      values[':workerId'] = filter.worker;
-    }
-
     if (filter.messageSearch) {
       values[':messageSearch'] = filter.messageSearch;
     }
@@ -164,6 +152,15 @@ export class LogRepository {
       values[':endDate'] = filter.endDate;
     }
 
+    if (filter.bot) {
+      values[':pk'] = `Log#${filter.bot}`;
+    }
+
+    if (filter.worker) {
+      values[':workerId'] = `${filter.worker}#`;
+    }
+
     return values;
   }
 }
+

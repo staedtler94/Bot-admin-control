@@ -7,12 +7,14 @@ export interface Worker {
 }
 
 export interface CreateWorkerInput {
+  id?: string;
   name: string;
   description?: string;
   bot: string;
 }
 
 export interface UpdateWorkerInput {
+  id?: string;
   name?: string;
   description?: string;
 }

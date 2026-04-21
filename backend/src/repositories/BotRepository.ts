@@ -3,16 +3,19 @@ import { getDynamoDBClient } from '../config/database';
 import { Bot, CreateBotInput, UpdateBotInput } from '../models/Bot';
 import { v4 as uuidv4 } from 'uuid';
 
-const TABLE_NAME = 'bots';
+const TABLE_NAME = 'bot-admin';
 
 export class BotRepository {
   static async findAll(limit: number = 20, offset: number = 0): Promise<{ items: Bot[]; count: number }> {
     const client = getDynamoDBClient();
     const result = await client.send(
-      new ScanCommand({
+      new QueryCommand({
         TableName: TABLE_NAME,
+        KeyConditionExpression: 'pk = :pk',
+        ExpressionAttributeValues: {
+          ':pk': 'Bot',
+        },
         Limit: limit,
-        ExclusiveStartKey: offset > 0 ? { id: '' } : undefined, // Simple offset (for production, use ExclusiveStartKey)
       })
     );
 
@@ -27,7 +30,7 @@ export class BotRepository {
     const result = await client.send(
       new GetCommand({
         TableName: TABLE_NAME,
-        Key: { id },
+        Key: { pk: 'Bot', sk: id },
       })
     );
 
@@ -37,7 +40,7 @@ export class BotRepository {
   static async create(input: CreateBotInput): Promise<Bot> {
     const client = getDynamoDBClient();
     const bot: Bot = {
-      id: uuidv4(),
+      id: input.id || uuidv4(),
       name: input.name,
       description: input.description,
       status: input.status || 'ENABLED',
@@ -47,7 +50,11 @@ export class BotRepository {
     await client.send(
       new PutCommand({
         TableName: TABLE_NAME,
-        Item: bot,
+        Item: {
+          pk: 'Bot',
+          sk: bot.id,
+          ...bot,
+        },
       })
     );
 
@@ -86,7 +93,7 @@ export class BotRepository {
     const result = await client.send(
       new UpdateCommand({
         TableName: TABLE_NAME,
-        Key: { id },
+        Key: { pk: 'Bot', sk: id },
         UpdateExpression: updateExpression.join(', '),
         ExpressionAttributeNames: Object.keys(expressionAttributeNames).length > 0 ? expressionAttributeNames : undefined,
         ExpressionAttributeValues: expressionAttributeValues,
@@ -102,7 +109,7 @@ export class BotRepository {
     await client.send(
       new DeleteCommand({
         TableName: TABLE_NAME,
-        Key: { id },
+        Key: { pk: 'Bot', sk: id },
       })
     );
   }

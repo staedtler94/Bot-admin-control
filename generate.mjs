@@ -42,38 +42,58 @@ const workerIds = [
   'c41a527e-0b14-4f56-bc0d-b1c77833d50a'
 ];
 
-const createBot = () => ({
-  id: faker.string.uuid(),
+const workerBotMap = [];
+
+const createBot = (index) => ({
+  id: botIds[index],
+  name: botNames[index],
+  description: faker.lorem.sentence(),
+  status: faker.helpers.arrayElement(['DISABLED', 'ENABLED', 'PAUSED']),
   created: faker.number.int({ min: moment().startOf('day').unix() * 1000, max: moment().endOf('day').unix() * 1000 }),
 });
 
-const createWorker = () => ({
-  id: faker.string.uuid(),
+const createWorker = (index) => ({
+  id: workerIds[index],
+  name: workerNames[index],
+  description: faker.lorem.sentence(),
+  bot: botIds[faker.number.int({ min: 0, max: botIds.length - 1 })],
   created: faker.number.int({ min: moment().startOf('day').unix() * 1000, max: moment().endOf('day').unix() * 1000 }),
 });
 
-const createLogs = () => ({
+const createLogs = () => {
+  const workerBot = workerBotMap[faker.number.int({ min: 0, max: workerBotMap.length - 1 })];
+  return {
   id: faker.string.uuid(),
   created: faker.date.between({ from: moment(moment().startOf('day').unix() * 1000, "X").format(), to: moment(moment().endOf('day').unix() * 1000, "X").format() }),
   message: faker.string.alpha({ length: { min: 12, max: 400 } }),
-  bot: faker.helpers.arrayElement(botIds),
-  worker: faker.helpers.arrayElement(workerIds)
-});
+  bot: workerBot.bot,
+  worker: workerBot.id
+  }
+};
 
 const writeBots = () => {  
-  const bots = faker.helpers.multiple(createBot, { count: 3 });
+  const bots = botIds.map((_, index) => createBot(index));
   const jsonString = JSON.stringify(bots, null, 2);
-  fs.writeFile('bots.json', jsonString, () => console.log('Bots Written'));
+  fs.writeFileSync('data/bots.json', jsonString);
+  console.log('✅ Bots Written');
 }
 
 const writeWorkers = () => {
-  const workers = faker.helpers.multiple(createWorker, { count: 12 });
+  const workers = workerIds.map((_, index) => createWorker(index));
   const jsonString = JSON.stringify(workers, null, 2);
-  fs.writeFile('workers.json', jsonString, () => console.log('Workers Written'));
+  workerBotMap.push(...workers.map(worker => ({ id: worker.id, bot: worker.bot })));
+  fs.writeFileSync('data/workers.json', jsonString);
+  console.log('✅ Workers Written');
 }
 
 const writeLogs = () => {
   const logs = faker.helpers.multiple(createLogs, { count: 2000 });
   const jsonString = JSON.stringify(logs, null, 2);
-  fs.writeFile('logs.json', jsonString, () => console.log('Logs Written'));
+  fs.writeFileSync('data/logs.json', jsonString);
+  console.log('✅ Logs Written')
 }
+
+// Execute all write functions
+writeBots();
+writeWorkers();
+writeLogs();

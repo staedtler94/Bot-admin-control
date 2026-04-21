@@ -11,14 +11,18 @@ export class WorkerService {
     return WorkerRepository.findAll(limit, offset);
   }
 
-  static async getWorkerById(id: string): Promise<Worker> {
-    if (!id || typeof id !== 'string') {
+  static async getWorkerById(workerId: string, botId: string): Promise<Worker> {
+    if (!workerId || typeof workerId !== 'string') {
       throw new Error('Invalid worker ID');
     }
 
-    const worker = await WorkerRepository.findById(id);
+    if (!botId || typeof botId !== 'string') {
+      throw new Error('Invalid bot ID');
+    }
+
+    const worker = await WorkerRepository.findById(workerId, botId);
     if (!worker) {
-      throw new Error(`Worker with ID ${id} not found`);
+      throw new Error(`Worker with ID ${workerId} not found`);
     }
 
     return worker;
@@ -59,9 +63,13 @@ export class WorkerService {
     return WorkerRepository.create(input);
   }
 
-  static async updateWorker(id: string, input: UpdateWorkerInput): Promise<Worker> {
-    if (!id || typeof id !== 'string') {
+  static async updateWorker(workerId: string, botId: string, input: UpdateWorkerInput): Promise<Worker> {
+    if (!workerId || typeof workerId !== 'string') {
       throw new Error('Invalid worker ID');
+    }
+
+    if (!botId || typeof botId !== 'string') {
+      throw new Error('Invalid bot ID');
     }
 
     if (input.name !== undefined && (typeof input.name !== 'string' || input.name.trim().length === 0)) {
@@ -69,24 +77,28 @@ export class WorkerService {
     }
 
     // Verify worker exists
-    const existing = await WorkerRepository.findById(id);
+    const existing = await WorkerRepository.findById(workerId, botId);
     if (!existing) {
-      throw new Error(`Worker with ID ${id} not found`);
+      throw new Error(`Worker with ID ${workerId} not found`);
     }
 
-    return WorkerRepository.update(id, input);
+    return WorkerRepository.update(workerId, botId, input);
   }
 
-  static async deleteWorker(id: string): Promise<void> {
-    if (!id || typeof id !== 'string') {
+  static async deleteWorker(workerId: string, botId: string): Promise<void> {
+    if (!workerId || typeof workerId !== 'string') {
       throw new Error('Invalid worker ID');
     }
 
-    const existing = await WorkerRepository.findById(id);
-    if (!existing) {
-      throw new Error(`Worker with ID ${id} not found`);
+    if (!botId || typeof botId !== 'string') {
+      throw new Error('Invalid bot ID');
     }
 
-    await WorkerRepository.delete(id);
+    const existing = await WorkerRepository.findById(workerId, botId);
+    if (!existing) {
+      throw new Error(`Worker with ID ${workerId} not found`);
+    }
+
+    await WorkerRepository.delete(workerId, botId);
   }
 }

@@ -1,0 +1,773 @@
+openapi: 3.0.0
+info:
+  title: Bot Admin Control API
+  description: API for managing bots, workers, and logs in the Bot Admin Control system
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@servis-bot.com
+
+servers:
+  - url: http://localhost:3000
+    description: Development server
+  - url: http://localhost:8000
+    description: Docker server
+    
+paths:
+  /health:
+    get:
+      summary: Health check endpoint
+      description: Check if the API is alive and responding
+      tags:
+        - Health
+      responses:
+        '200':
+          description: API is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  timestamp:
+                    type: string
+                    format: date-time
+                example:
+                  success: true
+                  message: "API is healthy"
+                  timestamp: "2024-01-15T10:30:00.000Z"
+
+  /api/bots:
+    get:
+      summary: List all bots
+      description: Retrieve a paginated list of all bots
+      tags:
+        - Bots
+      parameters:
+        - name: limit
+          in: query
+          description: Number of items to return (max 100, default 20)
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+        - name: offset
+          in: query
+          description: Number of items to skip (default 0)
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: List of bots retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Bot'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      summary: Create a new bot
+      description: Create a new bot with the provided information
+      tags:
+        - Bots
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBotInput'
+      responses:
+        '201':
+          description: Bot created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/Bot'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/bots/{id}:
+    get:
+      summary: Get bot details
+      description: Retrieve details of a specific bot by ID
+      tags:
+        - Bots
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Bot ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Bot details retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/Bot'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    put:
+      summary: Update a bot
+      description: Update an existing bot's information
+      tags:
+        - Bots
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Bot ID
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateBotInput'
+      responses:
+        '200':
+          description: Bot updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/Bot'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      summary: Delete a bot
+      description: Delete a specific bot by ID
+      tags:
+        - Bots
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Bot ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Bot deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/workers:
+    get:
+      summary: List all workers
+      description: Retrieve a paginated list of all workers
+      tags:
+        - Workers
+      parameters:
+        - name: limit
+          in: query
+          description: Number of items to return (max 100, default 20)
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+        - name: offset
+          in: query
+          description: Number of items to skip (default 0)
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: List of workers retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Worker'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      summary: Create a new worker
+      description: Create a new worker with the provided information
+      tags:
+        - Workers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWorkerInput'
+      responses:
+        '201':
+          description: Worker created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/Worker'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/workers/{id}:
+    get:
+      summary: Get worker details
+      description: Retrieve details of a specific worker by ID
+      tags:
+        - Workers
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Worker ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Worker details retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/Worker'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    put:
+      summary: Update a worker
+      description: Update an existing worker's information
+      tags:
+        - Workers
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Worker ID
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateWorkerInput'
+      responses:
+        '200':
+          description: Worker updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/Worker'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      summary: Delete a worker
+      description: Delete a specific worker by ID
+      tags:
+        - Workers
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Worker ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Worker deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/workers/bot/{botId}:
+    get:
+      summary: Get workers for a specific bot
+      description: Retrieve all workers associated with a specific bot
+      tags:
+        - Workers
+      parameters:
+        - name: botId
+          in: path
+          required: true
+          description: Bot ID
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Number of items to return (max 100, default 20)
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+      responses:
+        '200':
+          description: List of workers for the bot retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Worker'
+                  pagination:
+                    $ref: '#/components/schemas/PaginationSimple'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/logs:
+    post:
+      summary: Create a new log
+      description: Create a new log entry
+      tags:
+        - Logs
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLogInput'
+      responses:
+        '201':
+          description: Log created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/Log'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/logs/bot/{botId}:
+    get:
+      summary: Get logs for a specific bot
+      description: Retrieve all logs for a specific bot with optional message search
+      tags:
+        - Logs
+      parameters:
+        - name: botId
+          in: path
+          required: true
+          description: Bot ID
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Number of items to return (max 100, default 20)
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+        - name: search
+          in: query
+          description: Search term to filter logs by message content
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of logs for the bot retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Log'
+                  pagination:
+                    $ref: '#/components/schemas/PaginationSimple'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/logs/worker/{workerId}:
+    get:
+      summary: Get logs for a specific worker
+      description: Retrieve all logs for a specific worker with optional message search
+      tags:
+        - Logs
+      parameters:
+        - name: workerId
+          in: path
+          required: true
+          description: Worker ID
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Number of items to return (max 100, default 20)
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+        - name: search
+          in: query
+          description: Search term to filter logs by message content
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of logs for the worker retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Log'
+                  pagination:
+                    $ref: '#/components/schemas/PaginationSimple'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  schemas:
+    Bot:
+      type: object
+      required:
+        - id
+        - name
+        - status
+        - created
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the bot
+        name:
+          type: string
+          description: Name of the bot
+        description:
+          type: string
+          nullable: true
+          description: Optional description of the bot
+        status:
+          type: string
+          enum: [DISABLED, ENABLED, PAUSED]
+          description: Current status of the bot
+        created:
+          type: integer
+          description: Unix timestamp when the bot was created
+
+    CreateBotInput:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: Name of the bot
+        description:
+          type: string
+          nullable: true
+          description: Optional description of the bot
+        status:
+          type: string
+          enum: [DISABLED, ENABLED, PAUSED]
+          default: DISABLED
+          description: Initial status of the bot
+
+    UpdateBotInput:
+      type: object
+      properties:
+        name:
+          type: string
+          description: New name for the bot
+        description:
+          type: string
+          nullable: true
+          description: New description for the bot
+        status:
+          type: string
+          enum: [DISABLED, ENABLED, PAUSED]
+          description: New status for the bot
+
+    Worker:
+      type: object
+      required:
+        - id
+        - name
+        - bot
+        - created
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the worker
+        name:
+          type: string
+          description: Name of the worker
+        description:
+          type: string
+          nullable: true
+          description: Optional description of the worker
+        bot:
+          type: string
+          description: ID of the bot this worker belongs to
+        created:
+          type: integer
+          description: Unix timestamp when the worker was created
+
+    CreateWorkerInput:
+      type: object
+      required:
+        - name
+        - bot
+      properties:
+        name:
+          type: string
+          description: Name of the worker
+        description:
+          type: string
+          nullable: true
+          description: Optional description of the worker
+        bot:
+          type: string
+          description: ID of the bot this worker belongs to
+
+    UpdateWorkerInput:
+      type: object
+      properties:
+        name:
+          type: string
+          description: New name for the worker
+        description:
+          type: string
+          nullable: true
+          description: New description for the worker
+
+    Log:
+      type: object
+      required:
+        - id
+        - created
+        - message
+        - bot
+        - worker
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the log
+        created:
+          type: string
+          format: date-time
+          description: ISO timestamp when the log was created
+        message:
+          type: string
+          description: The log message content
+        bot:
+          type: string
+          description: ID of the bot associated with this log
+        worker:
+          type: string
+          description: ID of the worker associated with this log
+
+    CreateLogInput:
+      type: object
+      required:
+        - message
+        - bot
+        - worker
+      properties:
+        message:
+          type: string
+          description: The log message content
+        bot:
+          type: string
+          description: ID of the bot associated with this log
+        worker:
+          type: string
+          description: ID of the worker associated with this log
+
+    Pagination:
+      type: object
+      required:
+        - limit
+        - offset
+        - total
+      properties:
+        limit:
+          type: integer
+          description: Number of items returned
+        offset:
+          type: integer
+          description: Number of items skipped
+        total:
+          type: integer
+          description: Total number of items available
+
+    PaginationSimple:
+      type: object
+      required:
+        - limit
+        - total
+      properties:
+        limit:
+          type: integer
+          description: Number of items returned
+        total:
+          type: integer
+          description: Total number of items available
+
+  responses:
+    BadRequest:
+      description: Bad request - Invalid parameters or request body
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: "Invalid request parameters"
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: "Resource not found"
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: "Internal server error"
+
+tags:
+  - name: Health
+    description: Health check endpoints
+  - name: Bots
+    description: Bot management operations
+  - name: Workers
+    description: Worker management operations
+  - name: Logs
+    description: Log query and creation operations

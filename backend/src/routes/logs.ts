@@ -1,7 +1,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { LogService } from '../services/LogService';
 
-const router = Router();
+const router = Router({ mergeParams: true });
 
 // GET /api/logs/bot/:botId - Get logs for a specific bot
 router.get('/bot/:botId', async (req: Request, res: Response, next: NextFunction) => {
@@ -30,19 +30,20 @@ router.get('/bot/:botId', async (req: Request, res: Response, next: NextFunction
   }
 });
 
-// GET /api/logs/worker/:workerId - Get logs for a specific worker
+// GET /api/logs/worker/:workerId - Get logs for a specific worker (requires botId in query)
 router.get('/worker/:workerId', async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const botId = req.query.botId as string || req.params.botId;
+    if (!botId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Bot ID is required',
+      });
+    }
+
     const limit = Math.min(parseInt(req.query.limit as string) || 20, 100);
-    const messageSearch = req.query.search as string | undefined;
 
-    const filter = {
-      worker: req.params.workerId,
-      messageSearch,
-      limit,
-    };
-
-    const result = await LogService.getLogsWithFilter(filter);
+    const result = await LogService.getLogsByWorkerId(botId, req.params.workerId, limit);
 
     res.json({
       success: true,

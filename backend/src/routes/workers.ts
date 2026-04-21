@@ -1,7 +1,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { WorkerService } from '../services/WorkerService';
 
-const router = Router();
+const router = Router({ mergeParams: true });
 
 // GET /api/workers - List all workers
 router.get('/', async (req: Request, res: Response, next: NextFunction) => {
@@ -25,10 +25,37 @@ router.get('/', async (req: Request, res: Response, next: NextFunction) => {
   }
 });
 
-// GET /api/workers/:id - Get worker details
-router.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
+// GET /api/bots/:botId/workers - Get workers for a specific bot
+router.get('/bot/:botId', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const worker = await WorkerService.getWorkerById(req.params.id);
+    const limit = Math.min(parseInt(req.query.limit as string) || 20, 100);
+    const result = await WorkerService.getWorkersByBotId(req.params.botId, limit);
+
+    res.json({
+      success: true,
+      data: result.items,
+      pagination: {
+        limit,
+        total: result.count,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// GET /api/workers/:id - Get worker details (requires botId in query)
+router.get('/:workerId', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const botId = req.query.botId as string || req.params.botId;
+    if (!botId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Bot ID is required',
+      });
+    }
+
+    const worker = await WorkerService.getWorkerById(req.params.workerId, botId);
 
     res.json({
       success: true,
@@ -53,10 +80,18 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   }
 });
 
-// PUT /api/workers/:id - Update a worker
-router.put('/:id', async (req: Request, res: Response, next: NextFunction) => {
+// PUT /api/workers/:id - Update a worker (requires botId in query)
+router.put('/:workerId', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const worker = await WorkerService.updateWorker(req.params.id, req.body);
+    const botId = req.query.botId as string || req.params.botId;
+    if (!botId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Bot ID is required',
+      });
+    }
+
+    const worker = await WorkerService.updateWorker(req.params.workerId, botId, req.body);
 
     res.json({
       success: true,
@@ -67,33 +102,22 @@ router.put('/:id', async (req: Request, res: Response, next: NextFunction) => {
   }
 });
 
-// DELETE /api/workers/:id - Delete a worker
-router.delete('/:id', async (req: Request, res: Response, next: NextFunction) => {
+// DELETE /api/workers/:id - Delete a worker (requires botId in query)
+router.delete('/:workerId', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    await WorkerService.deleteWorker(req.params.id);
+    const botId = req.query.botId as string || req.params.botId;
+    if (!botId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Bot ID is required',
+      });
+    }
+
+    await WorkerService.deleteWorker(req.params.workerId, botId);
 
     res.json({
       success: true,
       message: 'Worker deleted successfully',
-    });
-  } catch (error) {
-    next(error);
-  }
-});
-
-// GET /api/workers/bot/:botId - Get workers for a specific bot
-router.get('/bot/:botId', async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const limit = Math.min(parseInt(req.query.limit as string) || 20, 100);
-    const result = await WorkerService.getWorkersByBotId(req.params.botId, limit);
-
-    res.json({
-      success: true,
-      data: result.items,
-      pagination: {
-        limit,
-        total: result.count,
-      },
     });
   } catch (error) {
     next(error);

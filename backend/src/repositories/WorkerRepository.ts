@@ -3,15 +3,18 @@ import { getDynamoDBClient } from '../config/database';
 import { Worker, CreateWorkerInput, UpdateWorkerInput } from '../models/Worker';
 import { v4 as uuidv4 } from 'uuid';
 
-const TABLE_NAME = 'workers';
+const TABLE_NAME = 'bot-admin';
 
 export class WorkerRepository {
   static async findAll(limit: number = 20, offset: number = 0): Promise<{ items: Worker[]; count: number }> {
     const client = getDynamoDBClient();
-    // For demo, just scan all workers
     const result = await client.send(
       new QueryCommand({
         TableName: TABLE_NAME,
+        KeyConditionExpression: 'pk = :pk',
+        ExpressionAttributeValues: {
+          ':pk': 'Worker',
+        },
         Limit: limit,
       })
     );
@@ -22,12 +25,12 @@ export class WorkerRepository {
     };
   }
 
-  static async findById(id: string): Promise<Worker | null> {
+  static async findById(workerId: string, botId: string): Promise<Worker | null> {
     const client = getDynamoDBClient();
     const result = await client.send(
       new GetCommand({
         TableName: TABLE_NAME,
-        Key: { id },
+        Key: { pk: 'Worker', sk: `${botId}#${workerId}` },
       })
     );
 
@@ -39,10 +42,10 @@ export class WorkerRepository {
     const result = await client.send(
       new QueryCommand({
         TableName: TABLE_NAME,
-        IndexName: 'bot-index',
-        KeyConditionExpression: 'bot = :botId',
+        KeyConditionExpression: 'pk = :pk AND begins_with(sk, :botId)',
         ExpressionAttributeValues: {
-          ':botId': botId,
+          ':pk': 'Worker',
+          ':botId': `${botId}#`,
         },
         Limit: limit,
       })
@@ -57,7 +60,7 @@ export class WorkerRepository {
   static async create(input: CreateWorkerInput): Promise<Worker> {
     const client = getDynamoDBClient();
     const worker: Worker = {
-      id: uuidv4(),
+      id: input.id ||uuidv4(),
       name: input.name,
       description: input.description,
       bot: input.bot,
@@ -67,14 +70,18 @@ export class WorkerRepository {
     await client.send(
       new PutCommand({
         TableName: TABLE_NAME,
-        Item: worker,
+        Item: {
+          pk: 'Worker',
+          sk: `${worker.bot}#${worker.id}`,
+          ...worker,
+        },
       })
     );
 
     return worker;
   }
 
-  static async update(id: string, input: UpdateWorkerInput): Promise<Worker> {
+  static async update(workerId: string, botId: string, input: UpdateWorkerInput): Promise<Worker> {
     const client = getDynamoDBClient();
     const updateExpression: string[] = [];
     const expressionAttributeValues: Record<string, any> = {};
@@ -92,7 +99,7 @@ export class WorkerRepository {
     }
 
     if (updateExpression.length === 0) {
-      const existing = await this.findById(id);
+      const existing = await this.findById(workerId, botId);
       if (!existing) throw new Error('Worker not found');
       return existing;
     }
@@ -100,7 +107,7 @@ export class WorkerRepository {
     const result = await client.send(
       new UpdateCommand({
         TableName: TABLE_NAME,
-        Key: { id },
+        Key: { pk: 'Worker', sk: `${botId}#${workerId}` },
         UpdateExpression: updateExpression.join(', '),
         ExpressionAttributeNames: Object.keys(expressionAttributeNames).length > 0 ? expressionAttributeNames : undefined,
         ExpressionAttributeValues: expressionAttributeValues,
@@ -111,13 +118,14 @@ export class WorkerRepository {
     return result.Attributes as Worker;
   }
 
-  static async delete(id: string): Promise<void> {
+  static async delete(workerId: string, botId: string): Promise<void> {
     const client = getDynamoDBClient();
     await client.send(
       new DeleteCommand({
         TableName: TABLE_NAME,
-        Key: { id },
+        Key: { pk: 'Worker', sk: `${botId}#${workerId}` },
       })
     );
   }
 }
+    

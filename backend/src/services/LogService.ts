@@ -2,6 +2,7 @@ import { LogRepository } from '../repositories/LogRepository';
 import { BotRepository } from '../repositories/BotRepository';
 import { WorkerRepository } from '../repositories/WorkerRepository';
 import { Log, CreateLogInput, LogFilter } from '../models/Log';
+import logger from '../utils/logger';
 
 export class LogService {
   static async getLogsByBotId(botId: string, limit: number = 20): Promise<{ items: Log[]; count: number }> {
@@ -21,13 +22,17 @@ export class LogService {
     return LogRepository.findByBotId(botId, limit);
   }
 
-  static async getLogsByWorkerId(workerId: string, limit: number = 20): Promise<{ items: Log[]; count: number }> {
+  static async getLogsByWorkerId(botId: string, workerId: string, limit: number = 20): Promise<{ items: Log[]; count: number }> {
+    if (!botId || typeof botId !== 'string') {
+      throw new Error('Invalid bot ID');
+    }
+
     if (!workerId || typeof workerId !== 'string') {
       throw new Error('Invalid worker ID');
     }
 
     // Verify worker exists
-    const worker = await WorkerRepository.findById(workerId);
+    const worker = await WorkerRepository.findById(workerId, botId);
     if (!worker) {
       throw new Error(`Worker with ID ${workerId} not found`);
     }
@@ -35,7 +40,7 @@ export class LogService {
     if (limit > 100) limit = 100;
     if (limit < 1) limit = 1;
 
-    return LogRepository.findByWorkerId(workerId, limit);
+    return LogRepository.findByWorkerId(botId, workerId, limit);
   }
 
   static async getLogsWithFilter(filter: LogFilter): Promise<{ items: Log[]; count: number }> {
@@ -50,8 +55,8 @@ export class LogService {
       }
     }
 
-    if (filter.worker) {
-      const worker = await WorkerRepository.findById(filter.worker);
+    if (filter.worker && filter.bot) {
+      const worker = await WorkerRepository.findById(filter.worker, filter.bot);
       if (!worker) {
         throw new Error(`Worker with ID ${filter.worker} not found`);
       }
@@ -85,7 +90,8 @@ export class LogService {
     }
 
     // Verify worker exists
-    const worker = await WorkerRepository.findById(input.worker);
+    const worker = await WorkerRepository.findById(input.worker, input.bot);
+    logger.info(`Creating log worker ${input.bot}#${input.worker}`);
     if (!worker) {
       throw new Error(`Worker with ID ${input.worker} not found`);
     }

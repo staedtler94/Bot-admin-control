@@ -4,7 +4,9 @@
   "description": "bot setup for admin control plane",
   "main": "index.js",
   "scripts": {
-    "start": "node generate.mjs"
+    "start": "node generate.mjs",
+    "docker:dynamodb": "docker-compose up -d dynamodb",
+    "seed:database": "node scripts/seed-database.mjs"
   },
   "author": "",
   "license": "ISC",

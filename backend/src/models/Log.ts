@@ -7,12 +7,14 @@ export interface Log {
 }
 
 export interface CreateLogInput {
+  id?: string;
   message: string;
   bot: string;
   worker: string;
 }
 
 export interface LogFilter {
+  id?: string;
   bot?: string;
   worker?: string;
   messageSearch?: string;

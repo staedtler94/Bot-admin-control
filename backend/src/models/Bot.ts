@@ -9,12 +9,14 @@ export interface Bot {
 }
 
 export interface CreateBotInput {
+  id?: string;
   name: string;
   description?: string;
   status?: BotStatus;
 }
 
 export interface UpdateBotInput {
+  id?: string;
   name?: string;
   description?: string;
   status?: BotStatus;

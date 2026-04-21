@@ -1,5 +1,6 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
+import logger from '../utils/logger';
 
 let dynamoDbClient: DynamoDBDocumentClient;
 
@@ -15,6 +16,7 @@ export function initializeDynamoDB(): DynamoDBDocumentClient {
       secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || 'local',
     },
   });
+  logger.info(`Initialized DynamoDB client with endpoint: ${endpoint}, region: ${region}`);
 
   dynamoDbClient = DynamoDBDocumentClient.from(client, {
     marshallOptions: {
@@ -27,7 +29,7 @@ export function initializeDynamoDB(): DynamoDBDocumentClient {
 
 export function getDynamoDBClient(): DynamoDBDocumentClient {
   if (!dynamoDbClient) {
-    throw new Error('DynamoDB client not initialized. Call initializeDynamoDB first.');
+    initializeDynamoDB();
   }
   return dynamoDbClient;
 }
