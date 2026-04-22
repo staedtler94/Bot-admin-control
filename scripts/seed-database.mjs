@@ -6,7 +6,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const API_BASE_URL = process.env.API_URL || 'http://localhost:3000/api';
 const BATCH_SIZE = 10;
-const BATCH_DELAY_MS = 500; // Delay between batches to avoid throttling
+const BATCH_DELAY_MS = 100; // Delay between batches to avoid throttling
 
 // ANSI color codes for logging
 const colors = {
@@ -201,7 +201,8 @@ async function seedDatabase() {
   if (logs.length === 0) {
     log('⚠️  No logs to seed', 'yellow');
   } else {
-    const logBatches = chunk(logs, BATCH_SIZE);
+    const LOG_BATCH_SIZE = BATCH_SIZE * 3;
+    const logBatches = chunk(logs, LOG_BATCH_SIZE);
     const totalBatches = logBatches.length;
     let logSuccess = 0;
     let logFailed = 0;

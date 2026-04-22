@@ -3,16 +3,16 @@ import { Log, CreateLogInput, LogFilter } from '../types/log';
 import { ApiResponse } from '../types/api';
 
 export const logService = {
-  getLogsByBotId: async (botId: string, limit: number = 20, search?: string) => {
+  getLogsByBotId: async (botId: string, limit: number = 20, offset: number = 0, search?: string) => {
     const response = await axiosInstance.get<ApiResponse<Log[]>>(`/logs/bot/${botId}`, {
-      params: { limit, search },
+      params: { limit, offset, search },
     });
     return response.data;
   },
 
-  getLogsByWorkerId: async (workerId: string, limit: number = 20, search?: string) => {
+  getLogsByWorkerId: async (workerId: string, botId: string, limit: number = 20, offset: number = 0, search?: string) => {
     const response = await axiosInstance.get<ApiResponse<Log[]>>(`/logs/worker/${workerId}`, {
-      params: { limit, search },
+      params: { botId, limit, offset, search },
     });
     return response.data;
   },

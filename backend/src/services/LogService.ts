@@ -5,7 +5,7 @@ import { Log, CreateLogInput, LogFilter } from '../models/Log';
 import logger from '../utils/logger';
 
 export class LogService {
-  static async getLogsByBotId(botId: string, limit: number = 20): Promise<{ items: Log[]; count: number }> {
+  static async getLogsByBotId(botId: string, limit: number = 20, offset: number = 0): Promise<{ items: Log[]; count: number; total: number }> {
     if (!botId || typeof botId !== 'string') {
       throw new Error('Invalid bot ID');
     }
@@ -18,11 +18,12 @@ export class LogService {
 
     if (limit > 100) limit = 100;
     if (limit < 1) limit = 1;
+    if (offset < 0) offset = 0;
 
-    return LogRepository.findByBotId(botId, limit);
+    return LogRepository.findByBotId(botId, limit, offset);
   }
 
-  static async getLogsByWorkerId(botId: string, workerId: string, limit: number = 20): Promise<{ items: Log[]; count: number }> {
+  static async getLogsByWorkerId(botId: string, workerId: string, limit: number = 20, offset: number = 0): Promise<{ items: Log[]; count: number; total: number }> {
     if (!botId || typeof botId !== 'string') {
       throw new Error('Invalid bot ID');
     }
@@ -39,11 +40,12 @@ export class LogService {
 
     if (limit > 100) limit = 100;
     if (limit < 1) limit = 1;
+    if (offset < 0) offset = 0;
 
-    return LogRepository.findByWorkerId(botId, workerId, limit);
+    return LogRepository.findByWorkerId(botId, workerId, limit, offset);
   }
 
-  static async getLogsWithFilter(filter: LogFilter): Promise<{ items: Log[]; count: number }> {
+  static async getLogsWithFilter(filter: LogFilter): Promise<{ items: Log[]; count: number; total: number }> {
     if (!filter.bot && !filter.worker) {
       throw new Error('Either bot ID or worker ID is required');
     }
@@ -63,10 +65,12 @@ export class LogService {
     }
 
     const limit = Math.min(filter.limit || 20, 100);
+    const offset = Math.max(filter.offset || 0, 0);
 
     return LogRepository.findWithFilter({
       ...filter,
       limit,
+      offset,
     });
   }
 

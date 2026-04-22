@@ -6,8 +6,9 @@ import { v4 as uuidv4 } from 'uuid';
 const TABLE_NAME = 'bot-admin';
 
 export class LogRepository {
-  static async findByBotId(botId: string, limit: number = 20): Promise<{ items: Log[]; count: number }> {
+  static async findByBotId(botId: string, limit: number = 20, offset: number = 0): Promise<{ items: Log[]; count: number; total: number }> {
     const client = getDynamoDBClient();
+    const adjustedLimit = limit + offset + 1; // Fetch one extra to detect if there's more
     const result = await client.send(
       new QueryCommand({
         TableName: TABLE_NAME,
@@ -15,19 +16,28 @@ export class LogRepository {
         ExpressionAttributeValues: {
           ':pk': `Log#${botId}`,
         },
-        Limit: limit,
+        Limit: adjustedLimit,
         ScanIndexForward: false, // Most recent first
       })
     );
 
+    const items = (result.Items as Log[]) || [];
+    const paginatedItems = items.slice(offset, offset + limit);
+    
+    // Calculate total: if we got more items than requested, we know there's more beyond
+    const hasMore = items.length > limit + offset;
+    const total = hasMore ? offset + limit + paginatedItems.length + 1 : items.length;
+
     return {
-      items: (result.Items as Log[]) || [],
-      count: result.Count || 0,
+      items: paginatedItems,
+      count: paginatedItems.length,
+      total,
     };
   }
 
-  static async findByWorkerId(botId: string, workerId: string, limit: number = 20): Promise<{ items: Log[]; count: number }> {
+  static async findByWorkerId(botId: string, workerId: string, limit: number = 20, offset: number = 0): Promise<{ items: Log[]; count: number; total: number }> {
     const client = getDynamoDBClient();
+    const adjustedLimit = limit + offset + 1; // Fetch one extra to detect if there's more
     const result = await client.send(
       new QueryCommand({
         TableName: TABLE_NAME,
@@ -36,20 +46,30 @@ export class LogRepository {
           ':pk': `Log#${botId}`,
           ':workerId': `${workerId}#`,
         },
-        Limit: limit,
+        Limit: adjustedLimit,
         ScanIndexForward: false, // Most recent first
       })
     );
 
+    const items = (result.Items as Log[]) || [];
+    const paginatedItems = items.slice(offset, offset + limit);
+    
+    // Calculate total: if we got more items than requested, we know there's more beyond
+    const hasMore = items.length > limit + offset;
+    const total = hasMore ? offset + limit + paginatedItems.length + 1 : items.length;
+
     return {
-      items: (result.Items as Log[]) || [],
-      count: result.Count || 0,
+      items: paginatedItems,
+      count: paginatedItems.length,
+      total,
     };
   }
 
-  static async findWithFilter(filter: LogFilter): Promise<{ items: Log[]; count: number }> {
+  static async findWithFilter(filter: LogFilter): Promise<{ items: Log[]; count: number; total: number }> {
     const client = getDynamoDBClient();
     const limit = Math.min(filter.limit || 20, 100);
+    const offset = Math.max(filter.offset || 0, 0);
+    const adjustedLimit = limit + offset + 1; // Fetch one extra to detect if there's more
 
     let result;
 
@@ -61,7 +81,7 @@ export class LogRepository {
           FilterExpression: this.buildFilterExpression(filter),
           ExpressionAttributeValues: this.buildAttributeValues(filter),
           ExpressionAttributeNames: filter.messageSearch ? { '#message': 'message' } : undefined,
-          Limit: limit,
+          Limit: adjustedLimit,
           ScanIndexForward: false,
         })
       );
@@ -73,7 +93,7 @@ export class LogRepository {
           FilterExpression: this.buildFilterExpression(filter),
           ExpressionAttributeValues: this.buildAttributeValues(filter),
           ExpressionAttributeNames: filter.messageSearch ? { '#message': 'message' } : undefined,
-          Limit: limit,
+          Limit: adjustedLimit,
           ScanIndexForward: false,
         })
       );
@@ -84,14 +104,22 @@ export class LogRepository {
           FilterExpression: this.buildFilterExpression(filter),
           ExpressionAttributeValues: this.buildAttributeValues(filter),
           ExpressionAttributeNames: filter.messageSearch ? { '#message': 'message' } : undefined,
-          Limit: limit,
+          Limit: adjustedLimit,
         })
       );
     }
 
+    const items = (result.Items as Log[]) || [];
+    const paginatedItems = items.slice(offset, offset + limit);
+    
+    // Calculate total: if we got more items than requested, we know there's more beyond
+    const hasMore = items.length > limit + offset;
+    const total = hasMore ? offset + limit + paginatedItems.length + 1 : items.length;
+
     return {
-      items: (result.Items as Log[]) || [],
-      count: result.Count || 0,
+      items: paginatedItems,
+      count: paginatedItems.length,
+      total,
     };
   }
 

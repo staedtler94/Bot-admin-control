@@ -7,12 +7,14 @@ const router = Router({ mergeParams: true });
 router.get('/bot/:botId', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const limit = Math.min(parseInt(req.query.limit as string) || 20, 100);
+    const offset = Math.max(parseInt(req.query.offset as string) || 0, 0);
     const messageSearch = req.query.search as string | undefined;
 
     const filter = {
       bot: req.params.botId,
       messageSearch,
       limit,
+      offset,
     };
 
     const result = await LogService.getLogsWithFilter(filter);
@@ -22,7 +24,8 @@ router.get('/bot/:botId', async (req: Request, res: Response, next: NextFunction
       data: result.items,
       pagination: {
         limit,
-        total: result.count,
+        offset,
+        total: result.total,
       },
     });
   } catch (error) {
@@ -42,15 +45,17 @@ router.get('/worker/:workerId', async (req: Request, res: Response, next: NextFu
     }
 
     const limit = Math.min(parseInt(req.query.limit as string) || 20, 100);
+    const offset = Math.max(parseInt(req.query.offset as string) || 0, 0);
 
-    const result = await LogService.getLogsByWorkerId(botId, req.params.workerId, limit);
+    const result = await LogService.getLogsByWorkerId(botId, req.params.workerId, limit, offset);
 
     res.json({
       success: true,
       data: result.items,
       pagination: {
         limit,
-        total: result.count,
+        offset,
+        total: result.total,
       },
     });
   } catch (error) {

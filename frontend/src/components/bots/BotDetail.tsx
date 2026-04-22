@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Bot } from '../../types/bot';
 import { formatDate, formatStatus, getStatusColor } from '../../utils/formatters';
 import { Tabs } from '../common/Tabs';
@@ -10,25 +10,37 @@ import { useLogsByBotId } from '../../hooks/useLogs';
 interface BotDetailProps {
   bot: Bot;
   onBack: () => void;
+  onWorkerClick?: (workerId: string) => void;
 }
 
-export const BotDetail: React.FC<BotDetailProps> = ({ bot, onBack }) => {
+export const BotDetail: React.FC<BotDetailProps> = ({ bot, onBack, onWorkerClick }) => {
   const { workers, loading: workersLoading, error: workersError } = useWorkersByBotId(bot.id);
-  const { logs, loading: logsLoading, error: logsError } = useLogsByBotId(bot.id);
-  const [expandedWorker, setExpandedWorker] = useState<string | null>(null);
-
-  const handleWorkerClick = (workerId: string) => {
-    setExpandedWorker(expandedWorker === workerId ? null : workerId);
-  };
+  const botLogsState = useLogsByBotId(bot.id);
 
   const tabs = [
     {
       label: `Workers (${workers.length})`,
-      content: <WorkerList workers={workers} loading={workersLoading} error={workersError} />,
+      content: (
+        <WorkerList
+          workers={workers}
+          loading={workersLoading}
+          error={workersError}
+          onWorkerClick={onWorkerClick}
+        />
+      ),
     },
     {
-      label: `Logs (${logs.length})`,
-      content: <LogList logs={logs} loading={logsLoading} error={logsError} />,
+      label: 'Logs',
+      content: (
+        <LogList
+          logs={botLogsState.logs}
+          loading={botLogsState.loading}
+          error={botLogsState.error}
+          pagination={botLogsState.pagination}
+          onPageChange={botLogsState.setOffset}
+          onSearch={botLogsState.setSearch}
+        />
+      ),
     },
   ];
 
