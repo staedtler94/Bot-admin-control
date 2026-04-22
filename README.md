@@ -95,11 +95,21 @@ Bot-admin-control/
 │
 ├── docs/
 │   ├── design/
-│   │   └── ARCHITECTURE.md    # Detailed architecture doc
-│   ├── playbook/
-│   │   └── Readme.md
-│   └── runbook/
-│       └── Readme.md
+│   │   ├── ARCHITECTURE.md
+│   │   └── api/openapi.yaml
+│   ├── playbook/              # Team workflows, quality gates, releases
+│   │   ├── Readme.md
+│   │   ├── development-workflow.md
+│   │   ├── testing-and-quality.md
+│   │   ├── releases-and-deployments.md
+│   │   └── incident-response.md
+│   └── runbook/               # Install, run, seed, operate, troubleshoot
+│       ├── Readme.md
+│       ├── setup.md
+│       ├── running-app.md
+│       ├── seeding.md
+│       ├── operations.md
+│       └── troubleshooting.md
 │
 ├── data/
 │   ├── bots.json
@@ -112,22 +122,16 @@ Bot-admin-control/
 
 ## Quick Start
 
-### Option 1: Docker Compose (Recommended)
+### Local Development
 
-Start all services with Docker Compose:
+**First-time setup (install + instructions for multiple terminals):**
 
 ```bash
-docker-compose up
+npm install
+npm run setup
 ```
 
-This starts:
-- DynamoDB Local on port 8000
-- Backend API on port 3000
-- Frontend on port 5173
-
-Access the application at `http://localhost:5173`
-
-### Option 2: Local Development
+That runs `npm install` in the repo root, `backend/`, and `frontend/`, then prints the recommended order: DynamoDB → backend → seed → frontend. For the printed steps only: `npm run setup:help`. See also [Runbook: Quick start](./docs/runbook/Readme.md).
 
 #### Backend Setup
 ```bash
@@ -360,6 +364,8 @@ environment:
 ## Resources
 
 - [Architecture Design Document](./docs/design/ARCHITECTURE.md)
+- [Playbook](./docs/playbook/Readme.md) (development workflow, testing, releases)
+- [Runbook](./docs/runbook/Readme.md) (setup, operations, troubleshooting)
 - [Backend README](./backend/README.md)
 - [Frontend README](./frontend/README.md)
 - [DynamoDB Documentation](https://docs.aws.amazon.com/dynamodb/)

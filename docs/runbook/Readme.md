@@ -1,95 +1,87 @@
-# Bot Admin Control - Runbook
+# Bot Admin Control — Runbooks
 
-## Table of Contents
+Runbooks are **step-by-step operational guides**: install, run, seed, verify, and recover. For **team workflows** (PRs, quality gates, releases), use the **[playbook](../playbook/Readme.md)**.
 
-Welcome to the Bot Admin Control runbook. This guide provides detailed procedures for operating the Bot Admin Control system.
-
-### 📋 Runbook Index
+## Index
 
 | Document | Purpose |
 |----------|---------|
-| **[Setup & Installation](./setup.md)** | Complete setup instructions for the application |
-| **[Database Seeding Guide](./seeding.md)** | How to seed the database with initial data |
-| **[Running the Application](./running-app.md)** | Step-by-step guide to run the application |
-| **[Troubleshooting](./troubleshooting.md)** | Common issues and solutions |
+| **[Setup and installation](./setup.md)** | Prerequisites, `npm install`, env files, start DynamoDB |
+| **[Running the application](./running-app.md)** | Order of services, dev commands, Vite proxy, stop/start |
+| **[Database seeding](./seeding.md)** | `npm run seed:database`, data files, clearing data |
+| **[Operations](./operations.md)** | Health URLs, quick curls, logs, restart order, API contract pointer |
+| **[Troubleshooting](./troubleshooting.md)** | Common errors (ports, CORS, DynamoDB, seed failures) |
 
----
+## Quick start (bash / zsh)
 
-## Quick Start
+**Prerequisites:** Node.js 20+, npm, Docker (for DynamoDB).
 
-### Prerequisites
-- Docker & Docker Compose
-- Node.js 18+
-- npm
+**Automated install + printed workflow (recommended for new clones):**
 
-### One-Command Setup
 ```bash
-# 1. Start DynamoDB
-docker-compose up -d dynamodb
+cd /path/to/Bot-admin-control
+npm install
+npm run setup
+```
 
-# 2. Install dependencies
-cd backend && npm install
-cd ../frontend && npm install
+`setup` runs `npm install` in the repo root, `backend/`, and `frontend/`, then prints the multi-terminal steps below. To only show those steps: `npm run setup:help`.
 
-# 3. In separate terminals, start the services
-# Terminal 1 - Backend
+**Manual install** (equivalent to what `setup` does for dependencies):
+
+```bash
+# 1) Dependencies
+cd /path/to/Bot-admin-control
+npm install
+cd backend && npm install && cd ..
+cd frontend && npm install && cd ..
+
+# 2) Database
+npm run docker:dynamodb
+# or: docker compose up -d dynamodb
+# wait until the container is healthy
+
+# 3) Backend (terminal 1)
 cd backend && npm run dev
 
-# Terminal 2 - Frontend  
+# 4) Frontend (terminal 2)
 cd frontend && npm run dev
 
-# Terminal 3 - Seed the database (after backend is running)
+# 5) Optional sample data (terminal 3, backend must be up)
 npm run seed:database
 ```
 
-Then access the application at **http://localhost:5173**
+- **UI:** http://localhost:5173  
+- **API:** http://localhost:3000/api  
+- **Health:** http://localhost:3000/health  
 
----
+Windows users can follow the same flow in PowerShell; [setup](./setup.md) includes Windows-oriented examples.
 
-## Available Commands
+## Quality checks (from repo root)
 
-**Root Level:**
-- `npm start` - Generate mock data
-- `npm run docker:dynamodb` - Start only DynamoDB container
-- `npm run seed:database` - Seed the database with data
-
-**Backend:**
-- `npm run dev` - Start backend development server
-- `npm run build` - Build backend
-- `npm test` - Run tests (if configured)
-
-**Frontend:**
-- `npm run dev` - Start frontend development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build
-- `npm run lint` - Run ESLint
-- `npm run format` - Format code with Prettier
-
----
-
-## Architecture Overview
-
-```
-┌─────────────┐
-│  Frontend   │ (React/Vite) :5173
-└──────┬──────┘
-       │ (proxied to /api)
-┌──────▼──────┐
-│  Backend    │ (Express/Node) :3000
-└──────┬──────┘
-       │
-┌──────▼──────┐
-│  DynamoDB   │ (Local) :8000
-└─────────────┘
+```bash
+npm run check:all
 ```
 
-- **Frontend** → Proxies API calls through Vite dev server
-- **Backend** → Express.js API server
-- **DynamoDB** → Local database via Docker
+Backend tests:
 
----
+```bash
+cd backend && npm test
+```
 
-## Support
+Details: [Testing and quality playbook](../playbook/testing-and-quality.md).
 
-For detailed instructions on each operation, please refer to the individual runbook documents listed in the Table of Contents above.
+## Docker Compose (full stack)
 
+```bash
+docker compose up
+```
+
+See [ARCHITECTURE.md](../design/ARCHITECTURE.md) and [Releases playbook](../playbook/releases-and-deployments.md) for service wiring and environment variables.
+
+## Related docs
+
+| Resource | Link |
+|----------|------|
+| Architecture | [../design/ARCHITECTURE.md](../design/ARCHITECTURE.md) |
+| OpenAPI / REST contract | [../design/api/openapi.yaml](../design/api/openapi.yaml) |
+| Project README (overview) | [../../README.md](../../README.md) |

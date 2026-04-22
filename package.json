@@ -5,6 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node generate.mjs",
+    "setup": "node scripts/setup-dev.mjs",
+    "setup:help": "node scripts/setup-dev.mjs --skip-install",
     "docker:dynamodb": "docker-compose up -d dynamodb",
     "seed:database": "node scripts/seed-database.mjs",
     "typecheck:backend": "npm run typecheck --prefix backend",
