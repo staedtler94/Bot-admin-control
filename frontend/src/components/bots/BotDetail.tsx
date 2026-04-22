@@ -1,5 +1,6 @@
 import React from 'react';
 import { Bot } from '../../types/bot';
+import { Log } from '../../types/log';
 import { formatDate, formatStatus, getStatusColor } from '../../utils/formatters';
 import { Tabs } from '../common/Tabs';
 import { WorkerList } from '../workers/WorkerList';
@@ -11,9 +12,10 @@ interface BotDetailProps {
   bot: Bot;
   onBack: () => void;
   onWorkerClick?: (workerId: string) => void;
+  onLogClick?: (log: Log) => void;
 }
 
-export const BotDetail: React.FC<BotDetailProps> = ({ bot, onBack, onWorkerClick }) => {
+export const BotDetail: React.FC<BotDetailProps> = ({ bot, onBack, onWorkerClick, onLogClick }) => {
   const { workers, loading: workersLoading, error: workersError } = useWorkersByBotId(bot.id);
   const botLogsState = useLogsByBotId(bot.id);
 
@@ -39,6 +41,7 @@ export const BotDetail: React.FC<BotDetailProps> = ({ bot, onBack, onWorkerClick
           pagination={botLogsState.pagination}
           onPageChange={botLogsState.setOffset}
           onSearch={botLogsState.setSearch}
+          onLogClick={onLogClick}
         />
       ),
     },

@@ -1,4 +1,4 @@
-import { GetCommand, ScanCommand, PutCommand, UpdateCommand, DeleteCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
+import { GetCommand, PutCommand, UpdateCommand, DeleteCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { getDynamoDBClient } from '../config/database';
 import { Bot, CreateBotInput, UpdateBotInput } from '../models/Bot';
 import { v4 as uuidv4 } from 'uuid';
@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 const TABLE_NAME = 'bot-admin';
 
 export class BotRepository {
-  static async findAll(limit: number = 20, offset: number = 0): Promise<{ items: Bot[]; count: number }> {
+  static async findAll(limit: number = 20, _offset: number = 0): Promise<{ items: Bot[]; count: number }> {
     const client = getDynamoDBClient();
     const result = await client.send(
       new QueryCommand({

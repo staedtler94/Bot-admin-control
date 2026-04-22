@@ -1,5 +1,5 @@
 import axiosInstance from './api';
-import { Log, CreateLogInput, LogFilter } from '../types/log';
+import { Log, CreateLogInput } from '../types/log';
 import { ApiResponse } from '../types/api';
 
 export const logService = {

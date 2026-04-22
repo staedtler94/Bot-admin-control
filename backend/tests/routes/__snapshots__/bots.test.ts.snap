@@ -1,0 +1,107 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`Bots routes DELETE /api/bots/:id deletes a bot 1`] = `
+{
+  "message": "Bot deleted successfully",
+  "success": true,
+}
+`;
+
+exports[`Bots routes GET /api/bots propagates service errors through errorHandler 1`] = `
+{
+  "error": {
+    "message": "Invalid bot ID",
+    "statusCode": 400,
+  },
+  "success": false,
+}
+`;
+
+exports[`Bots routes GET /api/bots returns paginated bots 1`] = `
+{
+  "data": [
+    {
+      "created": 1700000000000,
+      "description": "A bot for testing",
+      "id": "bot-1",
+      "name": "Test Bot",
+      "status": "ENABLED",
+    },
+  ],
+  "pagination": {
+    "limit": 20,
+    "offset": 0,
+    "total": 1,
+  },
+  "success": true,
+}
+`;
+
+exports[`Bots routes GET /api/bots/:id returns 400 when service reports not found 1`] = `
+{
+  "error": {
+    "message": "Bot with ID x not found",
+    "statusCode": 400,
+  },
+  "success": false,
+}
+`;
+
+exports[`Bots routes GET /api/bots/:id returns a single bot 1`] = `
+{
+  "data": {
+    "created": 1700000000000,
+    "description": "A bot for testing",
+    "id": "bot-1",
+    "name": "Test Bot",
+    "status": "ENABLED",
+  },
+  "success": true,
+}
+`;
+
+exports[`Bots routes POST /api/bots creates a bot and returns 201 1`] = `
+{
+  "data": {
+    "created": 1700000000000,
+    "description": "A bot for testing",
+    "id": "bot-1",
+    "name": "Test Bot",
+    "status": "ENABLED",
+  },
+  "success": true,
+}
+`;
+
+exports[`Bots routes POST /api/bots returns 400 for validation errors recognised by the error handler 1`] = `
+{
+  "error": {
+    "message": "Invalid bot status. Must be one of: DISABLED, ENABLED, PAUSED",
+    "statusCode": 400,
+  },
+  "success": false,
+}
+`;
+
+exports[`Bots routes POST /api/bots returns 500 for errors the error handler does not classify 1`] = `
+{
+  "error": {
+    "message": "Internal server error",
+    "statusCode": 500,
+  },
+  "success": false,
+}
+`;
+
+exports[`Bots routes PUT /api/bots/:id updates a bot 1`] = `
+{
+  "data": {
+    "created": 1700000000000,
+    "description": "A bot for testing",
+    "id": "bot-1",
+    "name": "Renamed",
+    "status": "ENABLED",
+  },
+  "success": true,
+}
+`;

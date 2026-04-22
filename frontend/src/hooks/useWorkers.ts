@@ -32,13 +32,13 @@ export const useWorkersByBotId = (botId: string) => {
   return { workers, loading, error };
 };
 
-export const useWorkerById = (workerId: string) => {
+export const useWorkerById = (workerId: string, botId: string) => {
   const [worker, setWorker] = useState<Worker | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!workerId) {
+    if (!workerId || !botId) {
       setLoading(false);
       return;
     }
@@ -47,7 +47,7 @@ export const useWorkerById = (workerId: string) => {
       try {
         setLoading(true);
         setError(null);
-        const response = await workerService.getWorkerById(workerId);
+        const response = await workerService.getWorkerById(workerId, botId);
         setWorker(response.data || null);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to fetch worker');
@@ -57,7 +57,7 @@ export const useWorkerById = (workerId: string) => {
     };
 
     fetchWorker();
-  }, [workerId]);
+  }, [workerId, botId]);
 
   return { worker, loading, error };
 };

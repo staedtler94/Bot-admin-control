@@ -1,0 +1,81 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`Logs routes GET /api/logs/bot/:botId maps "not found" to 400 1`] = `
+{
+  "error": {
+    "message": "Bot with ID x not found",
+    "statusCode": 400,
+  },
+  "success": false,
+}
+`;
+
+exports[`Logs routes GET /api/logs/bot/:botId returns filtered logs with pagination 1`] = `
+{
+  "data": [
+    {
+      "bot": "bot-1",
+      "created": "2023-11-14T22:13:20.000Z",
+      "id": "log-1",
+      "message": "Hello from the worker",
+      "worker": "worker-1",
+    },
+  ],
+  "pagination": {
+    "limit": 5,
+    "offset": 0,
+    "total": 1,
+  },
+  "success": true,
+}
+`;
+
+exports[`Logs routes GET /api/logs/worker/:workerId returns 400 when botId is missing 1`] = `
+{
+  "error": "Bot ID is required",
+  "success": false,
+}
+`;
+
+exports[`Logs routes GET /api/logs/worker/:workerId returns logs for the worker when botId is provided 1`] = `
+{
+  "data": [
+    {
+      "bot": "bot-1",
+      "created": "2023-11-14T22:13:20.000Z",
+      "id": "log-1",
+      "message": "Hello from the worker",
+      "worker": "worker-1",
+    },
+  ],
+  "pagination": {
+    "limit": 10,
+    "offset": 0,
+    "total": 1,
+  },
+  "success": true,
+}
+`;
+
+exports[`Logs routes POST /api/logs creates a log 1`] = `
+{
+  "data": {
+    "bot": "bot-1",
+    "created": "2023-11-14T22:13:20.000Z",
+    "id": "log-1",
+    "message": "Hello from the worker",
+    "worker": "worker-1",
+  },
+  "success": true,
+}
+`;
+
+exports[`Logs routes POST /api/logs returns 400 for validation errors recognised by the error handler 1`] = `
+{
+  "error": {
+    "message": "Invalid worker ID",
+    "statusCode": 400,
+  },
+  "success": false,
+}
+`;

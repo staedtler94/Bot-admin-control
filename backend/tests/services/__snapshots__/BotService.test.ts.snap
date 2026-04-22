@@ -1,0 +1,46 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`BotService createBot creates a bot with default status ENABLED 1`] = `
+{
+  "created": 1700000000000,
+  "description": "A bot for testing",
+  "id": "bot-1",
+  "name": "Test Bot",
+  "status": "ENABLED",
+}
+`;
+
+exports[`BotService getAllBots returns paginated items with defaults 1`] = `
+{
+  "count": 1,
+  "items": [
+    {
+      "created": 1700000000000,
+      "description": "A bot for testing",
+      "id": "bot-1",
+      "name": "Test Bot",
+      "status": "ENABLED",
+    },
+  ],
+}
+`;
+
+exports[`BotService getBotById returns the bot when found 1`] = `
+{
+  "created": 1700000000000,
+  "description": "A bot for testing",
+  "id": "bot-1",
+  "name": "Test Bot",
+  "status": "ENABLED",
+}
+`;
+
+exports[`BotService updateBot updates the bot when it exists 1`] = `
+{
+  "created": 1700000000000,
+  "description": "A bot for testing",
+  "id": "bot-1",
+  "name": "Updated",
+  "status": "ENABLED",
+}
+`;

@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 const TABLE_NAME = 'bot-admin';
 
 export class WorkerRepository {
-  static async findAll(limit: number = 20, offset: number = 0): Promise<{ items: Worker[]; count: number }> {
+  static async findAll(limit: number = 20, _offset: number = 0): Promise<{ items: Worker[]; count: number }> {
     const client = getDynamoDBClient();
     const result = await client.send(
       new QueryCommand({

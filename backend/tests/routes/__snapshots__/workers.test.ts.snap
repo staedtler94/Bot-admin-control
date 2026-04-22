@@ -1,0 +1,117 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`Workers routes DELETE /api/workers/:workerId deletes a worker 1`] = `
+{
+  "message": "Worker deleted successfully",
+  "success": true,
+}
+`;
+
+exports[`Workers routes DELETE /api/workers/:workerId returns 400 without botId 1`] = `
+{
+  "error": "Bot ID is required",
+  "success": false,
+}
+`;
+
+exports[`Workers routes GET /api/workers returns paginated workers 1`] = `
+{
+  "data": [
+    {
+      "bot": "bot-1",
+      "created": 1700000000000,
+      "description": "A worker for testing",
+      "id": "worker-1",
+      "name": "Test Worker",
+    },
+  ],
+  "pagination": {
+    "limit": 20,
+    "offset": 0,
+    "total": 1,
+  },
+  "success": true,
+}
+`;
+
+exports[`Workers routes GET /api/workers/:workerId maps "not found" to 400 via errorHandler 1`] = `
+{
+  "error": {
+    "message": "Worker with ID worker-1 not found",
+    "statusCode": 400,
+  },
+  "success": false,
+}
+`;
+
+exports[`Workers routes GET /api/workers/:workerId returns 400 when botId is missing 1`] = `
+{
+  "error": "Bot ID is required",
+  "success": false,
+}
+`;
+
+exports[`Workers routes GET /api/workers/:workerId returns the worker when botId is provided 1`] = `
+{
+  "data": {
+    "bot": "bot-1",
+    "created": 1700000000000,
+    "description": "A worker for testing",
+    "id": "worker-1",
+    "name": "Test Worker",
+  },
+  "success": true,
+}
+`;
+
+exports[`Workers routes GET /api/workers/bot/:botId returns workers for a bot 1`] = `
+{
+  "data": [
+    {
+      "bot": "bot-1",
+      "created": 1700000000000,
+      "description": "A worker for testing",
+      "id": "worker-1",
+      "name": "Test Worker",
+    },
+  ],
+  "pagination": {
+    "limit": 20,
+    "total": 1,
+  },
+  "success": true,
+}
+`;
+
+exports[`Workers routes POST /api/workers creates a worker 1`] = `
+{
+  "data": {
+    "bot": "bot-1",
+    "created": 1700000000000,
+    "description": "A worker for testing",
+    "id": "worker-1",
+    "name": "Test Worker",
+  },
+  "success": true,
+}
+`;
+
+exports[`Workers routes PUT /api/workers/:workerId returns 400 without botId 1`] = `
+{
+  "error": "Bot ID is required",
+  "success": false,
+}
+`;
+
+exports[`Workers routes PUT /api/workers/:workerId updates a worker 1`] = `
+{
+  "data": {
+    "bot": "bot-1",
+    "created": 1700000000000,
+    "description": "A worker for testing",
+    "id": "worker-1",
+    "name": "Renamed",
+  },
+  "success": true,
+}
+`;

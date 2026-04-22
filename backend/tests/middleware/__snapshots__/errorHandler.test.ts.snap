@@ -1,0 +1,41 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`errorHandler falls through to a 500 for unexpected errors 1`] = `
+{
+  "error": {
+    "message": "Internal server error",
+    "statusCode": 500,
+  },
+  "success": false,
+}
+`;
+
+exports[`errorHandler maps "Invalid" messages to 400 1`] = `
+{
+  "error": {
+    "message": "Invalid bot ID",
+    "statusCode": 400,
+  },
+  "success": false,
+}
+`;
+
+exports[`errorHandler maps "not found" messages to 400 1`] = `
+{
+  "error": {
+    "message": "Bot with ID X not found",
+    "statusCode": 400,
+  },
+  "success": false,
+}
+`;
+
+exports[`errorHandler returns the AppError status and payload 1`] = `
+{
+  "error": {
+    "message": "Thing broke",
+    "statusCode": 418,
+  },
+  "success": false,
+}
+`;

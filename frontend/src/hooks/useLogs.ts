@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Log } from '../types/log';
 import { logService } from '../services/logService';
+import { PAGE_SIZE } from '../utils/constants';
 
 export interface LogsState {
   logs: Log[];
@@ -15,7 +16,7 @@ export interface LogsState {
   setSearch: (search: string) => void;
 }
 
-export const useLogsByBotId = (botId: string, limit: number = 20): LogsState => {
+export const useLogsByBotId = (botId: string, limit: number = PAGE_SIZE): LogsState => {
   const [logs, setLogs] = useState<Log[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -58,7 +59,7 @@ export const useLogsByBotId = (botId: string, limit: number = 20): LogsState => 
   };
 };
 
-export const useLogsByWorkerId = (workerId: string, botId: string, limit: number = 20): LogsState => {
+export const useLogsByWorkerId = (workerId: string, botId: string, limit: number = PAGE_SIZE): LogsState => {
   const [logs, setLogs] = useState<Log[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

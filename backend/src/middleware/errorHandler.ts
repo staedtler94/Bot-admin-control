@@ -10,7 +10,7 @@ export class AppError extends Error {
   }
 }
 
-export const errorHandler = (err: Error | AppError, req: Request, res: Response, next: NextFunction) => {
+export const errorHandler = (err: Error | AppError, req: Request, res: Response, _next: NextFunction) => {
   console.error('Error:', err);
 
   if (err instanceof AppError) {
@@ -45,8 +45,14 @@ export const errorHandler = (err: Error | AppError, req: Request, res: Response,
   });
 };
 
-export const asyncHandler = (fn: Function) => {
+type AsyncRequestHandler = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => void | Promise<void>;
+
+export const asyncHandler = (fn: AsyncRequestHandler) => {
   return (req: Request, res: Response, next: NextFunction) => {
-    Promise.resolve(fn(req, res, next)).catch(next);
+    void Promise.resolve(fn(req, res, next)).catch(next);
   };
 };

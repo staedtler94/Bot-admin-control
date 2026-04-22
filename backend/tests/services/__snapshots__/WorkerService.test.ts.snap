@@ -1,0 +1,61 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`WorkerService createWorker creates a worker when bot exists 1`] = `
+{
+  "bot": "bot-1",
+  "created": 1700000000000,
+  "description": "A worker for testing",
+  "id": "worker-1",
+  "name": "Test Worker",
+}
+`;
+
+exports[`WorkerService getAllWorkers returns paginated items with defaults 1`] = `
+{
+  "count": 1,
+  "items": [
+    {
+      "bot": "bot-1",
+      "created": 1700000000000,
+      "description": "A worker for testing",
+      "id": "worker-1",
+      "name": "Test Worker",
+    },
+  ],
+}
+`;
+
+exports[`WorkerService getWorkerById returns the worker 1`] = `
+{
+  "bot": "bot-1",
+  "created": 1700000000000,
+  "description": "A worker for testing",
+  "id": "worker-1",
+  "name": "Test Worker",
+}
+`;
+
+exports[`WorkerService getWorkersByBotId returns workers when bot exists 1`] = `
+{
+  "count": 1,
+  "items": [
+    {
+      "bot": "bot-1",
+      "created": 1700000000000,
+      "description": "A worker for testing",
+      "id": "worker-1",
+      "name": "Test Worker",
+    },
+  ],
+}
+`;
+
+exports[`WorkerService updateWorker updates when worker exists 1`] = `
+{
+  "bot": "bot-1",
+  "created": 1700000000000,
+  "description": "A worker for testing",
+  "id": "worker-1",
+  "name": "Renamed",
+}
+`;

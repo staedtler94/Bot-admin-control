@@ -1,16 +1,18 @@
 import React from 'react';
 import { Worker } from '../../types/worker';
+import { Log } from '../../types/log';
 import { formatDate } from '../../utils/formatters';
 import { LogList } from '../logs/LogList';
 import { useLogsByWorkerId } from '../../hooks/useLogs';
-import { LoadingSpinner, ErrorMessage } from '../common/LoadingSpinner';
+import { ErrorMessage } from '../common/LoadingSpinner';
 
 interface WorkerDetailProps {
   worker: Worker;
   onBack: () => void;
+  onLogClick?: (log: Log) => void;
 }
 
-export const WorkerDetail: React.FC<WorkerDetailProps> = ({ worker, onBack }) => {
+export const WorkerDetail: React.FC<WorkerDetailProps> = ({ worker, onBack, onLogClick }) => {
   const workerLogsState = useLogsByWorkerId(worker.id, worker.bot);
 
   if (!worker) {
@@ -59,6 +61,7 @@ export const WorkerDetail: React.FC<WorkerDetailProps> = ({ worker, onBack }) =>
           pagination={workerLogsState.pagination}
           onPageChange={workerLogsState.setOffset}
           onSearch={workerLogsState.setSearch}
+          onLogClick={onLogClick}
         />
       </div>
     </div>

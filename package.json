@@ -6,7 +6,14 @@
   "scripts": {
     "start": "node generate.mjs",
     "docker:dynamodb": "docker-compose up -d dynamodb",
-    "seed:database": "node scripts/seed-database.mjs"
+    "seed:database": "node scripts/seed-database.mjs",
+    "typecheck:backend": "npm run typecheck --prefix backend",
+    "typecheck:frontend": "npm run typecheck --prefix frontend",
+    "lint:backend": "npm run lint --prefix backend",
+    "lint:frontend": "npm run lint --prefix frontend",
+    "check:backend": "npm run check --prefix backend",
+    "check:frontend": "npm run check --prefix frontend",
+    "check:all": "npm run typecheck:backend && npm run typecheck:frontend && npm run lint:backend && npm run lint:frontend"
   },
   "author": "",
   "license": "ISC",

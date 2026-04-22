@@ -1,8 +1,5 @@
-import fs from 'fs';
-import path from 'path';
-import { CreateTableCommand, ListTablesCommand } from '@aws-sdk/client-dynamodb';
+import { CreateTableCommand, ListTablesCommand, type CreateTableCommandInput } from '@aws-sdk/client-dynamodb';
 import { getDynamoDBClient } from './database';
-import { PutCommand } from '@aws-sdk/lib-dynamodb';
 
 
 const TABLES = [
@@ -29,7 +26,7 @@ async function createTables() {
     for (const table of TABLES) {
       if (!existingTables.includes(table.TableName)) {
         console.log(`Creating table: ${table.TableName}`);
-        await client.send(new CreateTableCommand(table as any));
+        await client.send(new CreateTableCommand(table as CreateTableCommandInput));
         console.log(`✓ Table ${table.TableName} created successfully`);
       } else {
         console.log(`✓ Table ${table.TableName} already exists`);

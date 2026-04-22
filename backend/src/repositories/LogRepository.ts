@@ -73,11 +73,11 @@ export class LogRepository {
 
     let result;
 
-    if (filter.bot) {
+    if (filter.worker && filter.bot) {
       result = await client.send(
         new QueryCommand({
           TableName: TABLE_NAME,
-          KeyConditionExpression: 'pk = :pk',
+          KeyConditionExpression: 'pk = :pk AND begins_with(sk, :workerId)',
           FilterExpression: this.buildFilterExpression(filter),
           ExpressionAttributeValues: this.buildAttributeValues(filter),
           ExpressionAttributeNames: filter.messageSearch ? { '#message': 'message' } : undefined,
@@ -85,11 +85,11 @@ export class LogRepository {
           ScanIndexForward: false,
         })
       );
-    } else if (filter.worker && filter.bot) {
+    } else if (filter.bot) {
       result = await client.send(
         new QueryCommand({
           TableName: TABLE_NAME,
-          KeyConditionExpression: 'pk = :pk AND begins_with(sk, :workerId)',
+          KeyConditionExpression: 'pk = :pk',
           FilterExpression: this.buildFilterExpression(filter),
           ExpressionAttributeValues: this.buildAttributeValues(filter),
           ExpressionAttributeNames: filter.messageSearch ? { '#message': 'message' } : undefined,

@@ -10,8 +10,10 @@ export const workerService = {
     return response.data;
   },
 
-  getWorkerById: async (id: string) => {
-    const response = await axiosInstance.get<ApiResponse<Worker>>(`/workers/${id}`);
+  getWorkerById: async (id: string, botId: string) => {
+    const response = await axiosInstance.get<ApiResponse<Worker>>(`/workers/${id}`, {
+      params: { botId },
+    });
     return response.data;
   },
 
